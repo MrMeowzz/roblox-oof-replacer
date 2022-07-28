@@ -17,6 +17,7 @@ Currently only supports Windows.</Description>
     <PackageIconUrl />
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <PackageProjectUrl>https://github.com/MrMeowzz/roblox-oof-replacer</PackageProjectUrl>
+    <PackageId>RobloxOofReplacer</PackageId>
   </PropertyGroup>
 
   <ItemGroup>
