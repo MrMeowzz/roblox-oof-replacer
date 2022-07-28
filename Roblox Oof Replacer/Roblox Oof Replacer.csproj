@@ -16,8 +16,15 @@ Currently only supports Windows.</Description>
     <PackageIcon>noob head.png</PackageIcon>
     <PackageIconUrl />
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-    <PackageProjectUrl>https://github.com/MrMeowzz/roblox-oof-replacer</PackageProjectUrl>
+    <PackageProjectUrl></PackageProjectUrl>
     <PackageId>RobloxOofReplacer</PackageId>
+    <RepositoryUrl>https://github.com/MrMeowzz/roblox-oof-replacer</RepositoryUrl>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <NeutralLanguage>en</NeutralLanguage>
+    <Platforms>AnyCPU;x64;x86;ARM32</Platforms>
+    <StartupObject>Roblox_Oof_Replacer.Program</StartupObject>
+    <AssemblyName>$(MSBuildProjectName)-$(Platform)</AssemblyName>
+    <Product>Roblox Oof Replacer</Product>
   </PropertyGroup>
 
   <ItemGroup>
@@ -48,6 +55,10 @@ Currently only supports Windows.</Description>
     <None Include="..\..\..\..\OneDrive\Pictures\noob head.png">
       <Pack>True</Pack>
       <PackagePath></PackagePath>
+    </None>
+    <None Include="..\README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
     </None>
     <None Include="D:\Bat files\Roblox Oof Replacer\LICENSE.txt">
       <Pack>True</Pack>
