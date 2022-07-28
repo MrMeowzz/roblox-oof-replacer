@@ -5,26 +5,54 @@
     <TargetFramework>net6.0-windows</TargetFramework>
     <RootNamespace>Roblox_Oof_Replacer</RootNamespace>
     <UseWindowsForms>true</UseWindowsForms>
-    <ApplicationIcon>noob head-1.ico</ApplicationIcon>
+    <ApplicationIcon>noob head.ico</ApplicationIcon>
     <Company></Company>
     <Authors>Mr Meowzz</Authors>
     <Description>Replaces the oof sound (death sound) in Roblox with the old one when you provide your Roblox shortcut!
 Just run this everytime Roblox updates and you should have the old death sound back or whatever sound you choose! May not work or break if Roblox changes the path of the death sound.
 Currently only supports Windows.</Description>
     <Copyright>Copyright (c) 2022 Mr Meowzz</Copyright>
-    <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
     <PackageIcon>noob head.png</PackageIcon>
     <PackageIconUrl />
-    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <PackageProjectUrl></PackageProjectUrl>
     <PackageId>RobloxOofReplacer</PackageId>
     <RepositoryUrl>https://github.com/MrMeowzz/roblox-oof-replacer</RepositoryUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <NeutralLanguage>en</NeutralLanguage>
-    <Platforms>AnyCPU;x64;x86;ARM32</Platforms>
+    <Platforms>AnyCPU;x64;x86</Platforms>
     <StartupObject>Roblox_Oof_Replacer.Program</StartupObject>
     <AssemblyName>$(MSBuildProjectName)-$(Platform)</AssemblyName>
     <Product>Roblox Oof Replacer</Product>
+    <Nullable>annotations</Nullable>
+    <Version>1.1.0</Version>
+    <AssemblyVersion>1.1.*</AssemblyVersion>
+    <Deterministic>false</Deterministic>
+    <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <NoWarn>1701;1702;CS7035</NoWarn>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <NoWarn>1701;1702;CS7035</NoWarn>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <NoWarn>1701;1702;CS7035</NoWarn>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <NoWarn>1701;1702;CS7035</NoWarn>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
+    <NoWarn>1701;1702;CS7035</NoWarn>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
+    <NoWarn>1701;1702;CS7035</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
@@ -40,6 +68,14 @@ Currently only supports Windows.</Description>
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="noob head.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Octokit" Version="1.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Compile Update="Properties\Settings.Designer.cs">
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <AutoGen>True</AutoGen>
@@ -51,18 +87,6 @@ Currently only supports Windows.</Description>
     <None Update="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
-    </None>
-    <None Include="..\..\..\..\OneDrive\Pictures\noob head.png">
-      <Pack>True</Pack>
-      <PackagePath></PackagePath>
-    </None>
-    <None Include="..\README.md">
-      <Pack>True</Pack>
-      <PackagePath>\</PackagePath>
-    </None>
-    <None Include="D:\Bat files\Roblox Oof Replacer\LICENSE.txt">
-      <Pack>True</Pack>
-      <PackagePath></PackagePath>
     </None>
   </ItemGroup>
 

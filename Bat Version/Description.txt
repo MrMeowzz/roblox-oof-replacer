@@ -1,0 +1,5 @@
+Replaces the oof sound (death sound) in Roblox with the old one when you provide your Roblox shortcut!
+Just run this everytime Roblox updates and you should have the old death sound back. May not work or break if Roblox changes the path of the death sound.
+Currently only supports Windows.
+Uses Batch (.Bat).
+Will not be updated, for updated version use .exe!
