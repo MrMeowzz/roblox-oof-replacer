@@ -1,9 +1,9 @@
-﻿using System;
+﻿using Shell32;
+using System;
 using System.Drawing;
-using System.Windows.Forms;
-using System.Net;
 using System.IO;
-using Shell32;
+using System.Net.Http;
+using System.Windows.Forms;
 
 namespace Roblox_Oof_Replacer
 {
@@ -67,7 +67,7 @@ namespace Roblox_Oof_Replacer
             }
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        private async void button1_Click(object sender, EventArgs e)
         {
             if (!File.Exists(openFileDialog1.FileName))
             {
@@ -95,9 +95,10 @@ namespace Roblox_Oof_Replacer
             if (openFileDialog2.FileName == string.Empty)
             {
                 oofname = "Old Oof";
-                using (var client = new WebClient())
+                using (HttpClient client = new())
                 {
-                    client.DownloadFile("https://www.dropbox.com/s/8204ehoprc90zvf/uuhhh.ogg?dl=1", ooflocation);
+                    byte[] fileBytes = await client.GetByteArrayAsync("https://www.dropbox.com/s/8204ehoprc90zvf/uuhhh.ogg?dl=1");
+                    File.WriteAllBytes(ooflocation, fileBytes);
                 }
             }
             else
@@ -107,7 +108,6 @@ namespace Roblox_Oof_Replacer
                     MessageBox.Show("Sound file provided does not exist.", "Error", MessageBoxButtons.OK);
                     return;
                 }
-                MessageBox.Show(Path.GetExtension(openFileDialog2.FileName));
                 if (Path.GetExtension(openFileDialog2.FileName) != ".ogg")
                 {
                     MessageBox.Show("Sound file provided is not an ogg!", "Error", MessageBoxButtons.OK);
