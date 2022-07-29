@@ -216,7 +216,7 @@ namespace Roblox_Oof_Replacer
             {
                 var releases = await githubclient.Repository.Release.GetAll("MrMeowzz", "roblox-oof-replacer");
                 var latest = releases[0];
-                if (true)//if (Version.Parse(latest.TagName.Remove(0, 1)) > Version.Parse(System.Windows.Forms.Application.ProductVersion))
+                if (Version.Parse(latest.TagName.Remove(0, 1)) > Version.Parse(System.Windows.Forms.Application.ProductVersion))
                 {
                     DialogResult result = MessageBox.Show("A new update is available! (" + latest.TagName + ") Would you like to download it now?", "New Update Available", MessageBoxButtons.YesNo);
                     if (result == DialogResult.Yes)
