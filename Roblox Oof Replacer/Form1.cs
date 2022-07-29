@@ -7,6 +7,7 @@ using System.Configuration;
 using System.Reflection;
 using Octokit;
 using System.Diagnostics;
+using System.Net;
 
 namespace Roblox_Oof_Replacer
 {
@@ -215,7 +216,7 @@ namespace Roblox_Oof_Replacer
             {
                 var releases = await githubclient.Repository.Release.GetAll("MrMeowzz", "roblox-oof-replacer");
                 var latest = releases[0];
-                if (Version.Parse(latest.TagName.Remove(0, 1)) > Version.Parse(System.Windows.Forms.Application.ProductVersion))
+                if (true)//if (Version.Parse(latest.TagName.Remove(0, 1)) > Version.Parse(System.Windows.Forms.Application.ProductVersion))
                 {
                     DialogResult result = MessageBox.Show("A new update is available! (" + latest.TagName + ") Would you like to download it now?", "New Update Available", MessageBoxButtons.YesNo);
                     if (result == DialogResult.Yes)
@@ -225,11 +226,26 @@ namespace Roblox_Oof_Replacer
                             var link = "https://github.com/MrMeowzz/roblox-oof-replacer/releases/latest/download/Roblox.Oof.Replacer-x86.exe";
                             if (Environment.Is64BitProcess)
                                 link = "https://github.com/MrMeowzz/roblox-oof-replacer/releases/latest/download/Roblox.Oof.Replacer-x64.exe";
+                            var response = await client.GetAsync(link);
+
+                            if (response.StatusCode == HttpStatusCode.NotFound)
+                            {
+                                result = MessageBox.Show("Download file not found! May not be uploaded yet or temporarily removed. Would you like to go to the releases page?", "Error", MessageBoxButtons.YesNo);
+                                if (result == DialogResult.Yes)
+                                {
+                                    Process.Start(new ProcessStartInfo()
+                                    {
+                                        FileName = "https://github.com/MrMeowzz/roblox-oof-replacer/releases/latest/",
+                                        UseShellExecute = true
+                                    });
+                                }
+                                return;
+                            }
 
                             byte[] fileBytes = await client.GetByteArrayAsync(link);
                             var newfilename = Path.GetFileNameWithoutExtension(link) + "-NEW" + Path.GetExtension(link);
                             var oldfilename = AppDomain.CurrentDomain.FriendlyName;
-                            File.WriteAllBytes(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), newfilename), fileBytes);
+                            File.WriteAllBytes(newfilename, fileBytes);
                             Process.Start(new ProcessStartInfo()
                             {
                                 Arguments = "/C choice /C Y /N /D Y /T 3 & Del \"" + System.Windows.Forms.Application.ExecutablePath + "\" & if exist " + newfilename + " (taskkill /IM " + newfilename + " & rename \"" + newfilename + "\" \"" + oldfilename + "\" & start " + Path.GetFileName(link) + ")",
@@ -244,7 +260,7 @@ namespace Roblox_Oof_Replacer
             }
             else
             {
-                DialogResult result = MessageBox.Show("Unable to check for updates, a new one may be available. Would you like to go to the latest release?", "Unable to Check for Updates", MessageBoxButtons.YesNo);
+                DialogResult result = MessageBox.Show("Unable to check for updates, a new one may be available. Would you like to go to the releases page?", "Unable to Check for Updates", MessageBoxButtons.YesNo);
                 if (result == DialogResult.Yes)
                 {
                     Process.Start(new ProcessStartInfo()
