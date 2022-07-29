@@ -161,6 +161,13 @@ namespace Roblox_Oof_Replacer
             folderBrowserDialog1.SelectedPath = string.Empty;
             label1.Text = Properties.Settings.Default.ShortcutFileName;
             label2.Text = "Old Oof";
+            var desktopshortcut = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "Roblox Player.lnk");
+            if (File.Exists(desktopshortcut))
+            {
+                openFileDialog1.FileName = desktopshortcut;
+                Properties.Settings.Default.ShortcutFileName = desktopshortcut;
+                label1.Text = desktopshortcut;
+            }
         }
 
         private void RobloxOofReplacer_FormClosing(object sender, FormClosingEventArgs e)
@@ -176,10 +183,9 @@ namespace Roblox_Oof_Replacer
 #endif
             Version assemblyversion = Assembly.GetExecutingAssembly().GetName().Version;
             versionToolTip.SetToolTip(version, "Build " + assemblyversion.Build + ", Revision " + assemblyversion.Revision);
+            var desktopshortcut = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "Roblox Player.lnk");
             if (Properties.Settings.Default.ShortcutFileName != string.Empty)
             {
-                if (!File.Exists(Properties.Settings.Default.ShortcutFileName) && !Directory.Exists(Properties.Settings.Default.ShortcutFileName))
-                {
                 if (File.Exists(Properties.Settings.Default.ShortcutFileName))
                     openFileDialog1.FileName = Properties.Settings.Default.ShortcutFileName;
                 else
@@ -187,11 +193,16 @@ namespace Roblox_Oof_Replacer
 
                 label1.Text = Properties.Settings.Default.ShortcutFileName;
             }
+            else if (File.Exists(desktopshortcut))
+            {
+                openFileDialog1.FileName = desktopshortcut;
+                Properties.Settings.Default.ShortcutFileName = desktopshortcut;
+                label1.Text = desktopshortcut;
             }
             if (Properties.Settings.Default.SoundFileName != string.Empty)
             {
                 openFileDialog2.FileName = Properties.Settings.Default.SoundFileName;
-                if (Properties.Settings.Default.SoundFileName == "")
+                if (Properties.Settings.Default.SoundFileName == String.Empty)
                     label2.Text = "Old Oof";
                 else
                     label2.Text = Properties.Settings.Default.SoundFileName;
@@ -217,10 +228,11 @@ namespace Roblox_Oof_Replacer
 
                             byte[] fileBytes = await client.GetByteArrayAsync(link);
                             var newfilename = Path.GetFileNameWithoutExtension(link) + "-NEW" + Path.GetExtension(link);
+                            var oldfilename = AppDomain.CurrentDomain.FriendlyName;
                             File.WriteAllBytes(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), newfilename), fileBytes);
                             Process.Start(new ProcessStartInfo()
                             {
-                                Arguments = "/C choice /C Y /N /D Y /T 3 & Del \"" + System.Windows.Forms.Application.ExecutablePath + "\" & if exist " + newfilename + " (taskkill /IM " + newfilename + " & rename \"" + newfilename + "\" \"" + Path.GetFileName(link) + "\" & start " + Path.GetFileName(link) + ")",
+                                Arguments = "/C choice /C Y /N /D Y /T 3 & Del \"" + System.Windows.Forms.Application.ExecutablePath + "\" & if exist " + newfilename + " (taskkill /IM " + newfilename + " & rename \"" + newfilename + "\" \"" + oldfilename + "\" & start " + Path.GetFileName(link) + ")",
                                 WindowStyle = ProcessWindowStyle.Hidden,
                                 CreateNoWindow = true,
                                 FileName = "cmd.exe"
@@ -253,6 +265,13 @@ namespace Roblox_Oof_Replacer
             openFileDialog1.FileName = Properties.Settings.Default.ShortcutFileName;
             folderBrowserDialog1.SelectedPath = string.Empty;
             label1.Text = Properties.Settings.Default.ShortcutFileName;
+            var desktopshortcut = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "Roblox Player.lnk");
+            if (File.Exists(desktopshortcut))
+            {
+                openFileDialog1.FileName = desktopshortcut;
+                Properties.Settings.Default.ShortcutFileName = desktopshortcut;
+                label1.Text = desktopshortcut;
+            }
         }
 
         private void button5_Click(object sender, EventArgs e)

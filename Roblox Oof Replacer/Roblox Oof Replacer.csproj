@@ -24,7 +24,7 @@ Currently only supports Windows.</Description>
     <AssemblyName>$(MSBuildProjectName)-$(Platform)</AssemblyName>
     <Product>Roblox Oof Replacer</Product>
     <Nullable>annotations</Nullable>
-    <Version>1.1.0</Version>
+    <Version>1.1.1</Version>
     <AssemblyVersion>1.1.*</AssemblyVersion>
     <Deterministic>false</Deterministic>
     <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
