@@ -34,8 +34,9 @@
             this.button2 = new System.Windows.Forms.Button();
             this.button3 = new System.Windows.Forms.Button();
             this.button4 = new System.Windows.Forms.Button();
-            this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
+            this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.copyPathToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openFileDialog2 = new System.Windows.Forms.OpenFileDialog();
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
             this.version = new System.Windows.Forms.Label();
@@ -45,6 +46,8 @@
             this.button6 = new System.Windows.Forms.Button();
             this.folderBrowserDialog1 = new System.Windows.Forms.FolderBrowserDialog();
             this.button7 = new System.Windows.Forms.Button();
+            this.label1 = new System.Windows.Forms.Label();
+            this.contextMenuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
             // button1
@@ -91,24 +94,12 @@
             this.button4.UseVisualStyleBackColor = true;
             this.button4.Click += new System.EventHandler(this.button4_Click);
             // 
-            // label1
-            // 
-            this.label1.AllowDrop = true;
-            this.label1.AutoEllipsis = true;
-            this.label1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.label1.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.label1.Location = new System.Drawing.Point(199, 45);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(242, 23);
-            this.label1.TabIndex = 7;
-            this.label1.DragDrop += new System.Windows.Forms.DragEventHandler(this.label1_DragDrop);
-            this.label1.DragEnter += new System.Windows.Forms.DragEventHandler(this.label1_DragEnter);
-            // 
             // label2
             // 
             this.label2.AllowDrop = true;
             this.label2.AutoEllipsis = true;
             this.label2.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.label2.ContextMenuStrip = this.contextMenuStrip1;
             this.label2.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
             this.label2.Location = new System.Drawing.Point(199, 126);
             this.label2.Name = "label2";
@@ -118,11 +109,26 @@
             this.label2.DragDrop += new System.Windows.Forms.DragEventHandler(this.label2_DragDrop);
             this.label2.DragEnter += new System.Windows.Forms.DragEventHandler(this.label2_DragEnter);
             // 
+            // contextMenuStrip1
+            // 
+            this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.copyPathToolStripMenuItem});
+            this.contextMenuStrip1.Name = "contextMenuStrip1";
+            this.contextMenuStrip1.Size = new System.Drawing.Size(130, 26);
+            this.contextMenuStrip1.Opening += new System.ComponentModel.CancelEventHandler(this.contextMenuStrip1_Opening);
+            this.contextMenuStrip1.ItemClicked += new System.Windows.Forms.ToolStripItemClickedEventHandler(this.contextMenuStrip1_ItemClicked);
+            // 
+            // copyPathToolStripMenuItem
+            // 
+            this.copyPathToolStripMenuItem.Name = "copyPathToolStripMenuItem";
+            this.copyPathToolStripMenuItem.Size = new System.Drawing.Size(129, 22);
+            this.copyPathToolStripMenuItem.Text = "Copy Path";
+            // 
             // openFileDialog2
             // 
             this.openFileDialog2.DefaultExt = "ogg";
             this.openFileDialog2.DereferenceLinks = false;
-            this.openFileDialog2.Filter = "Ogg files (*.ogg)|*.ogg";
+            this.openFileDialog2.Filter = "Sound files (*.ogg;*.mp3;*.wav)|*.ogg;*.mp3;*.wav";
             this.openFileDialog2.RestoreDirectory = true;
             this.openFileDialog2.Title = "Pick Sound";
             this.openFileDialog2.FileOk += new System.ComponentModel.CancelEventHandler(this.DisallowUrlExtensions);
@@ -141,9 +147,9 @@
             this.version.AutoSize = true;
             this.version.Location = new System.Drawing.Point(12, 9);
             this.version.Name = "version";
-            this.version.Size = new System.Drawing.Size(37, 15);
+            this.version.Size = new System.Drawing.Size(34, 15);
             this.version.TabIndex = 9;
-            this.version.Text = "v1.0.0";
+            this.version.Text = "v?.?.?";
             // 
             // label3
             // 
@@ -200,6 +206,20 @@
             this.button7.UseVisualStyleBackColor = true;
             this.button7.Click += new System.EventHandler(this.button7_Click);
             // 
+            // label1
+            // 
+            this.label1.AllowDrop = true;
+            this.label1.AutoEllipsis = true;
+            this.label1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.label1.ContextMenuStrip = this.contextMenuStrip1;
+            this.label1.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.label1.Location = new System.Drawing.Point(199, 45);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(242, 23);
+            this.label1.TabIndex = 7;
+            this.label1.DragDrop += new System.Windows.Forms.DragEventHandler(this.label1_DragDrop);
+            this.label1.DragEnter += new System.Windows.Forms.DragEventHandler(this.label1_DragEnter);
+            // 
             // RobloxOofReplacer
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
@@ -223,6 +243,7 @@
             this.Text = "Roblox Oof Replacer";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.RobloxOofReplacer_FormClosing);
             this.Load += new System.EventHandler(this.RobloxOofReplacer_Load);
+            this.contextMenuStrip1.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -233,7 +254,6 @@
         private System.Windows.Forms.Button button2;
         private System.Windows.Forms.Button button3;
         private System.Windows.Forms.Button button4;
-        private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.OpenFileDialog openFileDialog2;
         private System.Windows.Forms.OpenFileDialog openFileDialog1;
@@ -244,6 +264,9 @@
         private System.Windows.Forms.Button button6;
         private System.Windows.Forms.FolderBrowserDialog folderBrowserDialog1;
         private System.Windows.Forms.Button button7;
+        private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
+        private System.Windows.Forms.ToolStripMenuItem copyPathToolStripMenuItem;
+        private System.Windows.Forms.Label label1;
     }
 }
 

@@ -24,8 +24,8 @@ Currently only supports Windows.</Description>
     <AssemblyName>$(MSBuildProjectName)-$(Platform)</AssemblyName>
     <Product>Roblox Oof Replacer</Product>
     <Nullable>annotations</Nullable>
-    <Version>1.1.1</Version>
-    <AssemblyVersion>1.1.*</AssemblyVersion>
+    <Version>1.2.0</Version>
+    <AssemblyVersion>1.2.*</AssemblyVersion>
     <Deterministic>false</Deterministic>
     <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
@@ -72,15 +72,30 @@ Currently only supports Windows.</Description>
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="5.2.9" />
     <PackageReference Include="Octokit" Version="1.0.0" />
+    <PackageReference Include="Xabe.FFmpeg" Version="5.2.0" />
+    <PackageReference Include="Xabe.FFmpeg.Downloader" Version="5.2.0" />
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Update="Properties\Resources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
     <Compile Update="Properties\Settings.Designer.cs">
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <AutoGen>True</AutoGen>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
   </ItemGroup>
 
   <ItemGroup>

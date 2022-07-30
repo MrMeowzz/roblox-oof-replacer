@@ -8,6 +8,10 @@ using System.Reflection;
 using Octokit;
 using System.Diagnostics;
 using System.Net;
+using System.Drawing;
+using System.Globalization;
+using System.Threading.Tasks;
+using System.Linq;
 
 namespace Roblox_Oof_Replacer
 {
@@ -17,6 +21,8 @@ namespace Roblox_Oof_Replacer
         {
             InitializeComponent();
         }
+
+        public static System.Windows.Forms.Label ContextMenuLabel;
 
         public static string GetShortcutTargetFile(string shortcutFilename)
         {
@@ -121,7 +127,7 @@ namespace Roblox_Oof_Replacer
             else if (Directory.Exists(folderBrowserDialog1.SelectedPath))
             {
                 ooflocation = Path.Combine(folderBrowserDialog1.SelectedPath, "content", "sounds", "ouch.ogg");
-            }  
+            }
             if (ooflocation == null || !File.Exists(ooflocation))
             {
                 MessageBox.Show("Couldn't find ouch.ogg! Shortcut target or folder may not be Roblox OR the path of the sound may have changed. Your Roblox also might not be on the latest version.", "Error", MessageBoxButtons.OK);
@@ -131,11 +137,22 @@ namespace Roblox_Oof_Replacer
             if (openFileDialog2.FileName == string.Empty)
             {
                 oofname = "Old Oof";
-                using (HttpClient client = new())
+                if (Properties.Resources.uuhhh == null)
+                {
+                    using (HttpClient client = new())
+                    {
+                        //download file (slower)
+                        byte[] fileBytes = await client.GetByteArrayAsync("https://www.dropbox.com/s/8204ehoprc90zvf/uuhhh.ogg?dl=1");
+                        File.WriteAllBytes(ooflocation, fileBytes);
+                    }
+                }
+                File.WriteAllBytes(ooflocation, Properties.Resources.uuhhh);
+                /* using (HttpClient client = new())
                 {
                     byte[] fileBytes = await client.GetByteArrayAsync("https://www.dropbox.com/s/8204ehoprc90zvf/uuhhh.ogg?dl=1");
                     File.WriteAllBytes(ooflocation, fileBytes);
                 }
+                */
             }
             else
             {
@@ -144,9 +161,9 @@ namespace Roblox_Oof_Replacer
                     MessageBox.Show("Sound file provided does not exist.", "Error", MessageBoxButtons.OK);
                     return;
                 }
-                if (Path.GetExtension(openFileDialog2.FileName) != ".ogg")
+                if (Path.GetExtension(openFileDialog2.FileName) != ".ogg" && Path.GetExtension(openFileDialog2.FileName) != ".wav" && Path.GetExtension(openFileDialog2.FileName) != ".mp3")
                 {
-                    MessageBox.Show("Sound file provided is not an ogg!", "Error", MessageBoxButtons.OK);
+                    MessageBox.Show("Sound file type is not valid! Valid Types: .ogg, .wav, .mp3", "Error", MessageBoxButtons.OK);
                     return;
                 }
                 File.Copy(openFileDialog2.FileName, ooflocation, true);
@@ -176,6 +193,37 @@ namespace Roblox_Oof_Replacer
             Properties.Settings.Default.Save();
         }
 
+        public static bool HasInternetConnection(int timeoutMs = 10000, string url = null)
+        {
+            try
+            {
+                url ??= CultureInfo.InstalledUICulture switch
+                {
+                    { Name: var n } when n.StartsWith("fa") => // Iran
+                        "http://www.aparat.com",
+                    { Name: var n } when n.StartsWith("zh") => // China
+                        "http://www.baidu.com",
+                    _ =>
+                        "http://www.gstatic.com/generate_204",
+                };
+
+                using (HttpClient client = new())
+                {
+                    client.DefaultRequestHeaders.ConnectionClose = false;
+                    client.Timeout = TimeSpan.FromMilliseconds(timeoutMs);
+                    using (var response = client.GetAsync(url))
+                    {
+                        response.Wait();
+                        return response != null;
+                    }
+                }
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
         private async void RobloxOofReplacer_Load(object sender, EventArgs e)
         {
             version.Text = "v" + System.Windows.Forms.Application.ProductVersion;
@@ -185,7 +233,7 @@ namespace Roblox_Oof_Replacer
             Version assemblyversion = Assembly.GetExecutingAssembly().GetName().Version;
             versionToolTip.SetToolTip(version, "Build " + assemblyversion.Build + ", Revision " + assemblyversion.Revision);
             var desktopshortcut = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "Roblox Player.lnk");
-            if (Properties.Settings.Default.ShortcutFileName != string.Empty)
+            if (Properties.Settings.Default.ShortcutFileName != string.Empty && (File.Exists(Properties.Settings.Default.ShortcutFileName) || Directory.Exists(Properties.Settings.Default.ShortcutFileName)))
             {
                 if (File.Exists(Properties.Settings.Default.ShortcutFileName))
                     openFileDialog1.FileName = Properties.Settings.Default.ShortcutFileName;
@@ -200,15 +248,38 @@ namespace Roblox_Oof_Replacer
                 Properties.Settings.Default.ShortcutFileName = desktopshortcut;
                 label1.Text = desktopshortcut;
             }
-            if (Properties.Settings.Default.SoundFileName != string.Empty)
+            else
             {
-                openFileDialog2.FileName = Properties.Settings.Default.SoundFileName;
-                if (Properties.Settings.Default.SoundFileName == String.Empty)
-                    label2.Text = "Old Oof";
-                else
-                    label2.Text = Properties.Settings.Default.SoundFileName;
+                Properties.Settings.Default.ShortcutFileName = Properties.Settings.Default.GetType()
+                                                 .GetProperty(nameof(Properties.Settings.Default.ShortcutFileName))
+                                                 .GetCustomAttribute<System.Configuration.DefaultSettingValueAttribute>()
+                                                 .Value;
+            }
+            if (Properties.Settings.Default.SoundFileName != string.Empty && File.Exists(Properties.Settings.Default.SoundFileName))
+            {
+                    openFileDialog2.FileName = Properties.Settings.Default.SoundFileName;
+                    if (Properties.Settings.Default.SoundFileName == String.Empty)
+                        label2.Text = "Old Oof";
+                    else
+                        label2.Text = Properties.Settings.Default.SoundFileName;
+            }
+            else
+            {
+                Properties.Settings.Default.SoundFileName = Properties.Settings.Default.GetType()
+                                                 .GetProperty(nameof(Properties.Settings.Default.SoundFileName))
+                                                 .GetCustomAttribute<System.Configuration.DefaultSettingValueAttribute>()
+                                                 .Value;
             }
             // check for updates
+            if (!HasInternetConnection())
+            {
+                DialogResult result = MessageBox.Show("An Internet connection is required to check for updates.", "Unable to Check for Updates", MessageBoxButtons.RetryCancel);
+                if (result == DialogResult.Retry)
+                {
+                    RobloxOofReplacer_Load(sender, e);
+                }
+                return;
+            }
             var githubclient = new GitHubClient(new ProductHeaderValue("roblox-oof-replacer"));
             var rateLimitInfo = await githubclient.Miscellaneous.GetRateLimits();
             var rateLimit = rateLimitInfo.Resources.Core;
@@ -228,9 +299,9 @@ namespace Roblox_Oof_Replacer
                                 link = "https://github.com/MrMeowzz/roblox-oof-replacer/releases/latest/download/Roblox.Oof.Replacer-x64.exe";
                             var response = await client.GetAsync(link);
 
-                            if (response.StatusCode == HttpStatusCode.NotFound)
+                            if (response.StatusCode != HttpStatusCode.OK)
                             {
-                                result = MessageBox.Show("Download file not found! May not be uploaded yet or temporarily removed. Would you like to go to the releases page?", "Error", MessageBoxButtons.YesNo);
+                                result = MessageBox.Show("There was an error trying to get the download file. It may not be uploaded yet or it is temporarily removed. Would you like to go to the releases page?", "Error", MessageBoxButtons.YesNo);
                                 if (result == DialogResult.Yes)
                                 {
                                     Process.Start(new ProcessStartInfo()
@@ -241,7 +312,38 @@ namespace Roblox_Oof_Replacer
                                 }
                                 return;
                             }
-
+                            Hide();
+                            ProgressBarForm form = new ProgressBarForm();
+                            form.Location = Location;
+                            form.Show();
+                            Control[] title = form.Controls.Find("label1", true);
+                            if (title.Length > 0 && title[0] != null)
+                                title[0].Text = "Downloading " + latest.TagName;
+                            Control[] description = form.Controls.Find("label2", true);
+                            Control[] progressbar = form.Controls.Find("progressBar1", true);
+                            int? descriptiondistance = null;
+                            if (description.Length > 0 && description[0] != null)
+                            {
+                                if (progressbar.Length > 0 && progressbar[0] != null)
+                                    descriptiondistance = progressbar[0].Location.Y - (description[0].Location.Y + description[0].Height);
+                                string cutoffstring = latest.Body;
+                                if (cutoffstring.Split("\n").Last().Contains("Commit Changes"))
+                                {
+                                    int endinglines = 2;
+                                    for (int i = 0; i < endinglines; i++)
+                                        cutoffstring = cutoffstring.Remove(cutoffstring.LastIndexOf(Environment.NewLine));
+                                }
+                                description[0].Text = cutoffstring;
+                            }
+                            
+                            if (progressbar.Length > 0 && progressbar[0] != null && description.Length > 0 && description[0] != null)
+                            {
+                                int distance = form.Height - (progressbar[0].Location.Y + progressbar[0].Height);
+                                if (descriptiondistance != null)
+                                    progressbar[0].Location = new Point(progressbar[0].Location.X, (int)(description[0].Location.Y + description[0].Height + descriptiondistance));
+                                form.Height = progressbar[0].Location.Y + progressbar[0].Height + distance;
+                            }
+                            /*
                             byte[] fileBytes = await client.GetByteArrayAsync(link);
                             var newfilename = Path.GetFileNameWithoutExtension(link) + "-NEW" + Path.GetExtension(link);
                             var oldfilename = AppDomain.CurrentDomain.FriendlyName;
@@ -252,8 +354,9 @@ namespace Roblox_Oof_Replacer
                                 WindowStyle = ProcessWindowStyle.Hidden,
                                 CreateNoWindow = true,
                                 FileName = "cmd.exe"
-                            });
+                            });                            
                             System.Windows.Forms.Application.Exit();
+                            */
                         }
                     }
                 }
@@ -325,7 +428,7 @@ namespace Roblox_Oof_Replacer
             if (e.Data.GetDataPresent(DataFormats.FileDrop))
             {
                 string[] data = (string[])e.Data.GetData(DataFormats.FileDrop, false);
-                if (File.Exists(data[0]) && Path.GetExtension(data[0]) == ".ogg")
+                if (File.Exists(data[0]) && (Path.GetExtension(data[0]) == ".ogg" || Path.GetExtension(data[0]) == ".wav" || Path.GetExtension(data[0]) == ".mp3"))
                     openFileDialog2.FileName = Path.GetFullPath(data[0]);
                     label2.Text = Path.GetFullPath(data[0]);
             }
@@ -334,7 +437,7 @@ namespace Roblox_Oof_Replacer
         private void label2_DragEnter(object sender, DragEventArgs e)
         {
             string[] data = (string[])e.Data.GetData(DataFormats.FileDrop, false);
-            if (e.Data.GetDataPresent(DataFormats.FileDrop) && File.Exists(data[0]) && Path.GetExtension(data[0]) == ".ogg")
+            if (e.Data.GetDataPresent(DataFormats.FileDrop) && File.Exists(data[0]) && (Path.GetExtension(data[0]) == ".ogg" || Path.GetExtension(data[0]) == ".wav" || Path.GetExtension(data[0]) == ".mp3"))
                 e.Effect = DragDropEffects.Copy;
             else
                 e.Effect = DragDropEffects.None;
@@ -345,6 +448,32 @@ namespace Roblox_Oof_Replacer
             string extension = Path.GetExtension(openFileDialog1.FileName);
             if (extension == ".url") 
                 e.Cancel = true;
+        }
+
+        private void contextMenuStrip1_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
+        {
+            switch(e.ClickedItem.Text)
+            {
+                case "Copy Path":
+                    if (ContextMenuLabel != null)
+                        Clipboard.SetText(ContextMenuLabel.Text);
+                    break;
+            }
+        }
+
+        private void contextMenuStrip1_Opening(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            ContextMenuStrip owner = sender as ContextMenuStrip;
+            if (owner != null)
+            {
+                System.Windows.Forms.Label sourceControl = (System.Windows.Forms.Label)owner.SourceControl;
+                if (sourceControl.Text == "Old Oof")
+                {
+                    e.Cancel = true;
+                    return;
+                }
+                ContextMenuLabel = (System.Windows.Forms.Label)sourceControl;
+            }
         }
     }
 }
