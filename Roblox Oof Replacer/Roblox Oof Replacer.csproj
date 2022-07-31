@@ -24,11 +24,14 @@ Currently only supports Windows.</Description>
     <AssemblyName>$(MSBuildProjectName)-$(Platform)</AssemblyName>
     <Product>Roblox Oof Replacer</Product>
     <Nullable>annotations</Nullable>
-    <Version>1.2.0</Version>
+    <Version>1.2.1</Version>
     <AssemblyVersion>1.2.*</AssemblyVersion>
     <Deterministic>false</Deterministic>
     <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+    <SignAssembly>True</SignAssembly>
+    <DelaySign>False</DelaySign>
+    <AssemblyOriginatorKeyFile>keyPair.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -79,6 +82,9 @@ Currently only supports Windows.</Description>
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Update="PatchNotesForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Update="Properties\Resources.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>

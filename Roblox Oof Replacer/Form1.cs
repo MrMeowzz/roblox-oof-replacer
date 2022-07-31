@@ -230,6 +230,46 @@ namespace Roblox_Oof_Replacer
 #if DEBUG
             version.Text += "-Debug";
 #endif
+
+            if (Properties.Settings.Default.SettingsUpgradeRequired)
+            {
+                try
+                {
+                    Properties.Settings.Default.Upgrade();
+                    Properties.Settings.Default.SettingsUpgradeRequired = false;
+                    Properties.Settings.Default.Save();
+                }
+                catch (Exception ex)
+                {
+                    DialogResult result = MessageBox.Show("Failed to import old Settings! " + ex, "Error", MessageBoxButtons.RetryCancel);
+                    if (result == DialogResult.Retry)
+                    {
+                        RobloxOofReplacer_Load(sender, e);
+                    }
+                    return;
+                }
+            }
+
+            if (Properties.Settings.Default.PatchNotes != String.Empty && Properties.Settings.Default.PatchNotesVersion != String.Empty)
+            {
+                PatchNotesForm form = new PatchNotesForm();
+                form.Location = Location;
+                Control[] title = form.Controls.Find("label1", true);
+                if (title.Length > 0 && title[0] != null)
+                    title[0].Text = "Patch Notes " + Properties.Settings.Default.PatchNotesVersion;
+                Control[] description = form.Controls.Find("label2", true);
+                if (description.Length > 0 && description[0] != null)
+                {
+                    int distance = form.Height - (description[0].Location.Y + description[0].Height);
+                    description[0].Text = Properties.Settings.Default.PatchNotes;
+                    form.Height = description[0].Location.Y + description[0].Height + distance;
+                }
+
+                Properties.Settings.Default.PatchNotes = String.Empty;
+                Properties.Settings.Default.PatchNotesVersion = String.Empty;
+                form.ShowDialog();
+            }
+
             Version assemblyversion = Assembly.GetExecutingAssembly().GetName().Version;
             versionToolTip.SetToolTip(version, "Build " + assemblyversion.Build + ", Revision " + assemblyversion.Revision);
             var desktopshortcut = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "Roblox Player.lnk");
@@ -334,6 +374,8 @@ namespace Roblox_Oof_Replacer
                                         cutoffstring = cutoffstring.Remove(cutoffstring.LastIndexOf(Environment.NewLine));
                                 }
                                 description[0].Text = cutoffstring;
+                                Properties.Settings.Default.PatchNotes = cutoffstring;
+                                Properties.Settings.Default.PatchNotesVersion = latest.TagName;
                             }
                             
                             if (progressbar.Length > 0 && progressbar[0] != null && description.Length > 0 && description[0] != null)
