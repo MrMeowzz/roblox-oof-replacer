@@ -82,5 +82,40 @@ namespace Roblox_Oof_Replacer.Properties {
                 this["PatchNotesVersion"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("Death Sound")]
+        public string ReplaceType {
+            get {
+                return ((string)(this["ReplaceType"]));
+            }
+            set {
+                this["ReplaceType"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string FootstepSoundFileName {
+            get {
+                return ((string)(this["FootstepSoundFileName"]));
+            }
+            set {
+                this["FootstepSoundFileName"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        public string[] MouseImageFileName {
+            get {
+                return ((string[])(this["MouseImageFileName"]));
+            }
+            set {
+                this["MouseImageFileName"] = value;
+            }
+        }
     }
 }

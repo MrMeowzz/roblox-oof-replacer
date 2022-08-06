@@ -17,5 +17,14 @@
     <Setting Name="PatchNotesVersion" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
+    <Setting Name="ReplaceType" Type="System.String" Scope="User">
+      <Value Profile="(Default)">Death Sound</Value>
+    </Setting>
+    <Setting Name="FootstepSoundFileName" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="MouseImageFileName" Type="System.String[]" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
   </Settings>
 </SettingsFile>

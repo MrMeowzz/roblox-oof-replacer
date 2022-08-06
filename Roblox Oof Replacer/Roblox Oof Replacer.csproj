@@ -24,8 +24,8 @@ Currently only supports Windows.</Description>
     <AssemblyName>$(MSBuildProjectName)-$(Platform)</AssemblyName>
     <Product>Roblox Oof Replacer</Product>
     <Nullable>annotations</Nullable>
-    <Version>1.2.1</Version>
-    <AssemblyVersion>1.2.*</AssemblyVersion>
+    <Version>1.3.0</Version>
+    <AssemblyVersion>1.3.*</AssemblyVersion>
     <Deterministic>false</Deterministic>
     <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
@@ -75,9 +75,17 @@ Currently only supports Windows.</Description>
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="..\.editorconfig" Link=".editorconfig" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="5.2.9" />
-    <PackageReference Include="Octokit" Version="1.0.0" />
-    <PackageReference Include="Xabe.FFmpeg" Version="5.2.0" />
+    <PackageReference Include="NAudio" Version="2.1.0" />
+    <PackageReference Include="NAudio.Core" Version="2.1.0" />
+    <PackageReference Include="NAudio.Vorbis" Version="1.5.0" />
+    <PackageReference Include="Octokit" Version="2.0.0" />
+    <PackageReference Include="SoundTouch.Net" Version="2.3.2" />
+    <PackageReference Include="SoundTouch.Net.NAudioSupport.Core" Version="2.3.2" />
     <PackageReference Include="Xabe.FFmpeg.Downloader" Version="5.2.0" />
   </ItemGroup>
 

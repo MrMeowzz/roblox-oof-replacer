@@ -63,6 +63,56 @@ namespace Roblox_Oof_Replacer.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
+        internal static byte[] action_footsteps_plastic {
+            get {
+                object obj = ResourceManager.GetObject("action_footsteps_plastic", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap ArrowCursor {
+            get {
+                object obj = ResourceManager.GetObject("ArrowCursor", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap ArrowFarCursor {
+            get {
+                object obj = ResourceManager.GetObject("ArrowFarCursor", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap IBeamCursor {
+            get {
+                object obj = ResourceManager.GetObject("IBeamCursor", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap MouseLockedCursor {
+            get {
+                object obj = ResourceManager.GetObject("MouseLockedCursor", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
         internal static byte[] uuhhh {
             get {
                 object obj = ResourceManager.GetObject("uuhhh", resourceCulture);

@@ -12,6 +12,10 @@ using System.Drawing;
 using System.Globalization;
 using System.Threading.Tasks;
 using System.Linq;
+using SoundTouch.Net.NAudioSupport;
+using NAudio.Wave;
+using NAudio.Vorbis;
+using System.Collections.Generic;
 
 namespace Roblox_Oof_Replacer
 {
@@ -24,17 +28,24 @@ namespace Roblox_Oof_Replacer
 
         public static System.Windows.Forms.Label ContextMenuLabel;
 
+        public static string[] ReplaceTypes = 
+        {
+            "Death Sound",
+            "Footstep",
+            "Mouse",
+        };
+
         public static string GetShortcutTargetFile(string shortcutFilename)
         {
-            string pathOnly = System.IO.Path.GetDirectoryName(shortcutFilename);
-            string filenameOnly = System.IO.Path.GetFileName(shortcutFilename);
+            string pathOnly = Path.GetDirectoryName(shortcutFilename);
+            string filenameOnly = Path.GetFileName(shortcutFilename);
 
             Shell shell = new Shell();
             Folder folder = shell.NameSpace(pathOnly);
             FolderItem folderItem = folder.ParseName(filenameOnly);
             if (folderItem != null)
             {
-                Shell32.ShellLinkObject link = (Shell32.ShellLinkObject)folderItem.GetLink;
+                ShellLinkObject link = (ShellLinkObject)folderItem.GetLink;
                 return link.Path;
             }
 
@@ -74,10 +85,48 @@ namespace Roblox_Oof_Replacer
 
         private void button4_Click(object sender, EventArgs e)
         {
+            switch (Properties.Settings.Default.ReplaceType)
+            {
+                case "Death Sound": 
+                case "Footstep":
+                    {
+                        openFileDialog2.Filter = "Sound files (*.ogg;*.mp3;*.wav)|*.ogg;*.mp3;*.wav";
+                        openFileDialog2.DefaultExt = "ogg";
+                        openFileDialog2.Title = "Choose Sound";
+                        openFileDialog2.Multiselect = false;
+                        break;
+                    }
+                case "Mouse":
+                    {
+                        openFileDialog2.Filter = "Image files (*.png;*.jpg;*.jpeg;*.gif;*.ico)|*.png;*.jpg;*.jpeg;*.gif;*.ico";
+                        openFileDialog2.DefaultExt = "ogg";
+                        openFileDialog2.Title = "Choose Images";
+                        openFileDialog2.Multiselect = true;
+                        break;
+                    }
+            }
             if (openFileDialog2.ShowDialog() == DialogResult.OK)
             {
                 label2.Text = openFileDialog2.FileName;
-                Properties.Settings.Default.SoundFileName = openFileDialog2.FileName;
+                switch (Properties.Settings.Default.ReplaceType)
+                {
+                    case "Death Sound":
+                        {
+                            Properties.Settings.Default.SoundFileName = openFileDialog2.FileName;
+                            break;
+                        }
+                    case "Footstep":
+                        {
+                            Properties.Settings.Default.FootstepSoundFileName = openFileDialog2.FileName;
+                            break;
+                        }
+                    case "Mouse":
+                        {
+                            label2.Text = string.Join(", ", openFileDialog2.FileNames);
+                            Properties.Settings.Default.MouseImageFileName = openFileDialog2.FileNames;
+                            break;
+                        }
+                }
             }
         }
 
@@ -101,6 +150,45 @@ namespace Roblox_Oof_Replacer
             }
         }
 
+        public static byte[] ImageToByte(Image img)
+        {
+            using (var stream = new MemoryStream())
+            {
+                img.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
+                return stream.ToArray();
+            }
+        }
+
+        private static System.Drawing.Image resizeImage(System.Drawing.Image imgToResize, Size size)
+        {
+            //Get the image current width  
+            int sourceWidth = imgToResize.Width;
+            //Get the image current height  
+            int sourceHeight = imgToResize.Height;
+            float nPercent = 0;
+            float nPercentW = 0;
+            float nPercentH = 0;
+            //Calulate  width with new desired size  
+            nPercentW = ((float)size.Width / (float)sourceWidth);
+            //Calculate height with new desired size  
+            nPercentH = ((float)size.Height / (float)sourceHeight);
+            if (nPercentH < nPercentW)
+                nPercent = nPercentH;
+            else
+                nPercent = nPercentW;
+            //New Width  
+            int destWidth = (int)(sourceWidth * nPercent);
+            //New Height  
+            int destHeight = (int)(sourceHeight * nPercent);
+            Bitmap b = new Bitmap(destWidth, destHeight);
+            Graphics g = Graphics.FromImage((System.Drawing.Image)b);
+            g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+            // Draw image with new width and height  
+            g.DrawImage(imgToResize, 0, 0, destWidth, destHeight);
+            g.Dispose();
+            return (System.Drawing.Image)b;
+        }
+
         private async void button1_Click(object sender, EventArgs e)
         {
             if (!File.Exists(openFileDialog1.FileName) && !Directory.Exists(folderBrowserDialog1.SelectedPath))
@@ -108,7 +196,8 @@ namespace Roblox_Oof_Replacer
                 MessageBox.Show("Choose your Roblox Shortcut/Folder!", "Error", MessageBoxButtons.OK);
                 return;
             }
-            string? ooflocation = null;
+            string? soundlocation = null;
+            string[] cursorlocations = new string[4];
             if (File.Exists(openFileDialog1.FileName))
             {
                 if (Path.GetExtension(openFileDialog1.FileName) != ".lnk")
@@ -117,58 +206,292 @@ namespace Roblox_Oof_Replacer
                     return;
                 }
                 var location = GetShortcutTargetFile(openFileDialog1.FileName);
-                if (location == string.Empty)
+                if (location == string.Empty || location == null)
                 {
                     MessageBox.Show("Failed to locate target of shortcut!", "Error", MessageBoxButtons.OK);
                     return;
                 }
-                ooflocation = Path.Combine(location, @"..\", "content", "sounds", "ouch.ogg");
+                switch (Properties.Settings.Default.ReplaceType)
+                {
+                    case "Death Sound":
+                        {
+                            soundlocation = Path.Combine(location, @"..\", "content", "sounds", "ouch.ogg");
+                            break;
+                        }
+                    case "Footstep":
+                        {
+                            soundlocation = Path.Combine(location, @"..\", "content", "sounds", "action_footsteps_plastic.mp3");
+                            break;
+                        }
+                    case "Mouse":
+                        {
+                            cursorlocations[0] = Path.Combine(location, @"..\", "content", "textures", "Cursors", "KeyboardMouse", "ArrowFarCursor.png");
+                            cursorlocations[1] = Path.Combine(location, @"..\", "content", "textures", "Cursors", "KeyboardMouse", "ArrowCursor.png");
+                            cursorlocations[2] = Path.Combine(location, @"..\", "content", "textures", "MouseLockedCursor.png");
+                            cursorlocations[3] = Path.Combine(location, @"..\", "content", "textures", "Cursors", "KeyboardMouse", "IBeamCursor.png");
+                            break;
+                        }
+                }
+                
             }
             else if (Directory.Exists(folderBrowserDialog1.SelectedPath))
             {
-                ooflocation = Path.Combine(folderBrowserDialog1.SelectedPath, "content", "sounds", "ouch.ogg");
+                soundlocation = Path.Combine(folderBrowserDialog1.SelectedPath, "content", "sounds", "ouch.ogg");
             }
-            if (ooflocation == null || !File.Exists(ooflocation))
+            if (cursorlocations != null && cursorlocations.Length > 0)
             {
-                MessageBox.Show("Couldn't find ouch.ogg! Shortcut target or folder may not be Roblox OR the path of the sound may have changed. Your Roblox also might not be on the latest version.", "Error", MessageBoxButtons.OK);
+                string? foundnull = null;
+                for (int i = 0; i < cursorlocations.Length; i++)
+                    if ((cursorlocations[i] == null || !File.Exists(cursorlocations[i])) && i < openFileDialog2.FileNames.Length && Path.GetFileNameWithoutExtension(cursorlocations[i]) == Path.GetFileNameWithoutExtension(openFileDialog2.FileNames[i].TrimEnd(char.Parse("\"")).TrimStart(char.Parse("\""))))
+                    {
+                        foundnull = Path.GetFileName(cursorlocations[i]);
+                        break;
+                    }
+                if (foundnull != null)
+                {
+                    MessageBox.Show("Couldn't find " + foundnull + "! Shortcut target or folder may not be Roblox OR the path of the sound may have changed. Your Roblox also might not be on the latest version.", "Error", MessageBoxButtons.OK);
+                    return;
+                }
+            }
+            else if (soundlocation == null || !File.Exists(soundlocation))
+            {
+                MessageBox.Show("Couldn't find Arrow Images! Shortcut target or folder may not be Roblox OR the path of the sound may have changed. Your Roblox also might not be on the latest version.", "Error", MessageBoxButtons.OK);
                 return;
             }
-            var oofname = openFileDialog2.SafeFileName;
-            if (openFileDialog2.FileName == string.Empty)
+            if ((soundlocation == null || !File.Exists(soundlocation)) && (cursorlocations == null || cursorlocations.Length <= 0))
             {
-                oofname = "Old Oof";
-                if (Properties.Resources.uuhhh == null)
+                string message = string.Empty;
+                switch (Properties.Settings.Default.ReplaceType)
                 {
-                    using (HttpClient client = new())
+                    case "Death Sound":
+                        {
+                            message = "Couldn't find ouch.ogg! Shortcut target or folder may not be Roblox OR the path of the sound may have changed. Your Roblox also might not be on the latest version.";
+                            break;
+                        }
+                    case "Footstep":
+                        {
+                            message = "Couldn't find action_footsteps_plastic.mp3! Shortcut target or folder may not be Roblox OR the path of the sound may have changed. Your Roblox also might not be on the latest version.";
+                            break;
+                        }
+                }
+                MessageBox.Show(message, "Error", MessageBoxButtons.OK);
+                return;
+            }
+            switch (Properties.Settings.Default.ReplaceType)
+            {
+                case "Death Sound":
+                case "Footstep":
                     {
-                        //download file (slower)
-                        byte[] fileBytes = await client.GetByteArrayAsync("https://www.dropbox.com/s/8204ehoprc90zvf/uuhhh.ogg?dl=1");
-                        File.WriteAllBytes(ooflocation, fileBytes);
+                        var oofname = openFileDialog2.SafeFileName;
+                        if (openFileDialog2.FileName == string.Empty)
+                        {
+                            switch (Properties.Settings.Default.ReplaceType)
+                            {
+                                case "Death Sound":
+                                    {
+                                        oofname = "Old Oof";
+                                        if (Properties.Resources.uuhhh == null)
+                                        {
+                                            using (HttpClient client = new())
+                                            {
+                                                //download file (slower)
+                                                byte[] fileBytes = await client.GetByteArrayAsync("https://www.dropbox.com/s/8204ehoprc90zvf/uuhhh.ogg?dl=1");
+                                                File.WriteAllBytes(soundlocation, fileBytes);
+                                            }
+                                        }
+                                        File.WriteAllBytes(soundlocation, Properties.Resources.uuhhh);
+                                        /* using (HttpClient client = new())
+                                        {
+                                            byte[] fileBytes = await client.GetByteArrayAsync("https://www.dropbox.com/s/8204ehoprc90zvf/uuhhh.ogg?dl=1");
+                                            File.WriteAllBytes(soundlocation, fileBytes);
+                                        }
+                                        */
+                                        break;
+                                    }
+                                case "Footstep":
+                                    {
+                                        oofname = "Default Footsteps";
+                                        if (Properties.Resources.action_footsteps_plastic == null)
+                                        {
+                                            DialogResult result = MessageBox.Show("Failed to get action_footsteps_plastic.mp3 from Resources!", "Error", MessageBoxButtons.RetryCancel);
+                                            if (result == DialogResult.Retry)
+                                            {
+                                                button7_Click(sender, e);
+                                            }
+                                        }
+                                        File.WriteAllBytes(soundlocation, Properties.Resources.action_footsteps_plastic);
+                                        break;
+                                    }
+                            }
+                        }
+                        else
+                        {
+                            if (!File.Exists(openFileDialog2.FileName))
+                            {
+                                MessageBox.Show("Sound file provided does not exist.", "Error", MessageBoxButtons.OK);
+                                return;
+                            }
+                            if (Path.GetExtension(openFileDialog2.FileName) != ".ogg" && Path.GetExtension(openFileDialog2.FileName) != ".wav" && Path.GetExtension(openFileDialog2.FileName) != ".mp3")
+                            {
+                                MessageBox.Show("Sound file type is not valid! Valid Types: .ogg, .wav, .mp3", "Error", MessageBoxButtons.OK);
+                                return;
+                            }
+                            
+                            if (Properties.Settings.Default.ReplaceType == "Footstep")
+                            {
+                                WaveStream reader = Path.GetExtension(openFileDialog2.FileName) == ".ogg"
+                                    ? new VorbisWaveReader(openFileDialog2.FileName)
+                                    : new MediaFoundationReader(openFileDialog2.FileName);
+                                SoundTouchWaveStream stream = new(new WaveChannel32(reader));
+                                stream.Rate = 0.54;
+                                using (WaveFileWriter writer = new(soundlocation, stream.WaveFormat))
+                                {
+                                    byte[] buffer = new byte[Convert.ToInt32(stream.Length / stream.Rate)];
+                                    stream.Read(buffer, 0, buffer.Length);
+                                    writer.Write(buffer, 0, buffer.Length);
+                                    writer.Flush();
+                                }
+                            }
+                            else
+                                File.Copy(openFileDialog2.FileName, soundlocation, true);
+                        }
+                        string soundtype = "oof";
+                        if (Properties.Settings.Default.ReplaceType == "Footstep")
+                            soundtype = "footstep";
+                        MessageBox.Show("Successfully replaced current " + soundtype + " sound with " + oofname + "!", "Success", MessageBoxButtons.OK);
+                        break;
                     }
-                }
-                File.WriteAllBytes(ooflocation, Properties.Resources.uuhhh);
-                /* using (HttpClient client = new())
-                {
-                    byte[] fileBytes = await client.GetByteArrayAsync("https://www.dropbox.com/s/8204ehoprc90zvf/uuhhh.ogg?dl=1");
-                    File.WriteAllBytes(ooflocation, fileBytes);
-                }
-                */
+                case "Mouse":
+                    {
+
+                        string[] cursornames = openFileDialog2.SafeFileNames;
+                        List<string> cursorsreplaced = new();
+                        if (openFileDialog2.FileName == string.Empty)
+                        {
+                            cursornames = new string[] { "Default Mouse" };
+                            if (Properties.Resources.ArrowCursor == null)
+                            {
+                                DialogResult result = MessageBox.Show("Failed to get ArrowCursor.png from Resources!", "Error", MessageBoxButtons.RetryCancel);
+                                if (result == DialogResult.Retry)
+                                {
+                                    button7_Click(sender, e);
+                                }
+                                return;
+                            }
+                            if (Properties.Resources.ArrowFarCursor == null)
+                            {
+                                DialogResult result = MessageBox.Show("Failed to get ArrowFarCursor.png from Resources!", "Error", MessageBoxButtons.RetryCancel);
+                                if (result == DialogResult.Retry)
+                                {
+                                    button7_Click(sender, e);
+                                }
+                                return;
+                            }
+                            if (Properties.Resources.MouseLockedCursor == null)
+                            {
+                                DialogResult result = MessageBox.Show("Failed to get MouseLockedCursor.png from Resources!", "Error", MessageBoxButtons.RetryCancel);
+                                if (result == DialogResult.Retry)
+                                {
+                                    button7_Click(sender, e);
+                                }
+                                return;
+                            }
+                            if (Properties.Resources.IBeamCursor == null)
+                            {
+                                DialogResult result = MessageBox.Show("Failed to get IBeamCursor.png from Resources!", "Error", MessageBoxButtons.RetryCancel);
+                                if (result == DialogResult.Retry)
+                                {
+                                    button7_Click(sender, e);
+                                }
+                                return;
+                            }
+                            File.WriteAllBytes(cursorlocations[0], ImageToByte(Properties.Resources.ArrowFarCursor));
+                            File.WriteAllBytes(cursorlocations[1], ImageToByte(Properties.Resources.ArrowCursor));
+                            File.WriteAllBytes(cursorlocations[2], ImageToByte(Properties.Resources.MouseLockedCursor));
+                            File.WriteAllBytes(cursorlocations[3], ImageToByte(Properties.Resources.IBeamCursor));
+                            cursorsreplaced.Clear();
+                            for (int i = 0; i < cursorlocations.Length; i++)
+                                cursorsreplaced.Add(Path.GetFileName(cursorlocations[i]));
+                        }
+                        else
+                        {
+                            string[] trimmedfilenames = new string[Properties.Settings.Default.MouseImageFileName.Length];
+                            cursornames = new string[Properties.Settings.Default.MouseImageFileName.Length];
+                            for (int i = 0; i < Properties.Settings.Default.MouseImageFileName.Length; i++)
+                            {
+                                trimmedfilenames[i] = Properties.Settings.Default.MouseImageFileName[i].TrimEnd(char.Parse("\"")).TrimStart(char.Parse("\""));
+                                cursornames[i] = Path.GetFileName(trimmedfilenames[i]);
+                            }
+                            for (int i = 0; i < trimmedfilenames.Length; i++)
+                            {
+                                if (!File.Exists(trimmedfilenames[i]))
+                                {
+                                    MessageBox.Show(trimmedfilenames[i]);
+                                    MessageBox.Show("Image file " + Path.GetFileName(trimmedfilenames[i]) + " does not exist.", "Error", MessageBoxButtons.OK);
+                                    return;
+                                }
+                                if (Path.GetExtension(trimmedfilenames[i]) != ".png" && Path.GetExtension(trimmedfilenames[i]) != ".jpg" && Path.GetExtension(trimmedfilenames[i]) != ".jpeg" && Path.GetExtension(trimmedfilenames[i]) != ".gif" && Path.GetExtension(trimmedfilenames[i]) != ".ico")
+                                {
+                                    MessageBox.Show("The type for Image file " + Path.GetFileName(trimmedfilenames[i]) + " is not valid! Valid Types: .png, .jpg, .jpeg, .gif, .ico", "Error", MessageBoxButtons.OK);
+                                    return;
+                                }
+                            }
+                            if (trimmedfilenames.Length > cursorlocations.Length)
+                            {
+                                MessageBox.Show("Too many files selected. Max of " + cursorlocations.Length + " is able to be selected for the ArrowFarCursor, ArrowCursor, and the IBeamCursor.", "Error", MessageBoxButtons.OK);
+                                return;
+                            }
+                            if (trimmedfilenames.Length == 1)
+                            {
+                                cursorsreplaced.Clear();
+                                Image image = resizeImage(Image.FromFile(trimmedfilenames[0]), new Size(64, 64));
+                                for (int i = 0; i < cursorlocations.Length; i++)
+                                {
+                                    if (File.Exists(cursorlocations[i]))
+                                        File.Delete(cursorlocations[i]);
+                                    image.Save(cursorlocations[i], System.Drawing.Imaging.ImageFormat.Png);
+                                    cursorsreplaced.Add(Path.GetFileName(cursorlocations[i]));
+                                }
+                            }
+                            else
+                            {
+                                bool foundmatchingname = false;
+                                for (int i = 0; i < trimmedfilenames.Length; i++)
+                                {
+                                    if (cursorlocations[i] != null && Path.GetFileNameWithoutExtension(cursorlocations[i]) == Path.GetFileNameWithoutExtension(trimmedfilenames[i]))
+                                    {
+                                        foundmatchingname = true;
+                                        Image image = resizeImage(Image.FromFile(trimmedfilenames[i]), new Size(64, 64));
+                                        if (File.Exists(cursorlocations[i]))
+                                            File.Delete(cursorlocations[i]);
+                                        image.Save(cursorlocations[i], System.Drawing.Imaging.ImageFormat.Png);
+                                        cursorsreplaced.Add(Path.GetFileName(cursorlocations[i]));
+                                    }
+                                }
+                                if (!foundmatchingname)
+                                {
+                                    for (int i = 0; i < trimmedfilenames.Length; i++)
+                                    {
+                                        if (cursorlocations[i] != null)
+                                        {
+                                            Image image = resizeImage(Image.FromFile(trimmedfilenames[i]), new Size(64, 64));
+                                            if (File.Exists(cursorlocations[i]))
+                                                File.Delete(cursorlocations[i]);
+                                            image.Save(cursorlocations[i], System.Drawing.Imaging.ImageFormat.Png);
+                                            cursorsreplaced.Add(Path.GetFileName(cursorlocations[i]));
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        MessageBox.Show("Successfully replaced " + string.Join(", ", cursorsreplaced) + " with " + string.Join(", ", cursornames) + "!", "Success", MessageBoxButtons.OK);
+                        break;
+                    }
+                default:
+                    if (MessageBox.Show("Unknown Error while trying to replace current type!", "Error", MessageBoxButtons.RetryCancel) == DialogResult.Retry)
+                        button1_Click(sender, e);
+                    break;
             }
-            else
-            {
-                if (!File.Exists(openFileDialog2.FileName))
-                {
-                    MessageBox.Show("Sound file provided does not exist.", "Error", MessageBoxButtons.OK);
-                    return;
-                }
-                if (Path.GetExtension(openFileDialog2.FileName) != ".ogg" && Path.GetExtension(openFileDialog2.FileName) != ".wav" && Path.GetExtension(openFileDialog2.FileName) != ".mp3")
-                {
-                    MessageBox.Show("Sound file type is not valid! Valid Types: .ogg, .wav, .mp3", "Error", MessageBoxButtons.OK);
-                    return;
-                }
-                File.Copy(openFileDialog2.FileName, ooflocation, true);
-            }
-            MessageBox.Show("Successfully replaced current oof sound with " + oofname + "!", "Success", MessageBoxButtons.OK);
         }
 
         private void button2_Click(object sender, EventArgs e)
@@ -178,7 +501,8 @@ namespace Roblox_Oof_Replacer
             openFileDialog2.FileName = Properties.Settings.Default.SoundFileName;
             folderBrowserDialog1.SelectedPath = string.Empty;
             label1.Text = Properties.Settings.Default.ShortcutFileName;
-            label2.Text = "Old Oof";
+            //label2.Text = "Old Oof";
+            UpdateArrows();
             var desktopshortcut = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "Roblox Player.lnk");
             if (File.Exists(desktopshortcut))
             {
@@ -290,25 +614,27 @@ namespace Roblox_Oof_Replacer
             }
             else
             {
-                Properties.Settings.Default.ShortcutFileName = Properties.Settings.Default.GetType()
-                                                 .GetProperty(nameof(Properties.Settings.Default.ShortcutFileName))
-                                                 .GetCustomAttribute<System.Configuration.DefaultSettingValueAttribute>()
-                                                 .Value;
+                Properties.Settings.Default.ShortcutFileName = Properties.Settings.Default.Properties["ShortcutFileName"].DefaultValue as string;
             }
-            if (Properties.Settings.Default.SoundFileName != string.Empty && File.Exists(Properties.Settings.Default.SoundFileName))
+            
+            if (Properties.Settings.Default.SoundFileName == String.Empty || !File.Exists(Properties.Settings.Default.SoundFileName))
             {
-                    openFileDialog2.FileName = Properties.Settings.Default.SoundFileName;
-                    if (Properties.Settings.Default.SoundFileName == String.Empty)
-                        label2.Text = "Old Oof";
-                    else
-                        label2.Text = Properties.Settings.Default.SoundFileName;
+                Properties.Settings.Default.SoundFileName = Properties.Settings.Default.Properties["SoundFileName"].DefaultValue as string;
+            }
+            if (Properties.Settings.Default.FootstepSoundFileName == String.Empty || !File.Exists(Properties.Settings.Default.FootstepSoundFileName))
+            {
+                Properties.Settings.Default.FootstepSoundFileName = Properties.Settings.Default.Properties["FootstepSoundFileName"].DefaultValue as string;
+            }
+            UpdateArrows();
+            
+            if (ReplaceTypes.Contains(Properties.Settings.Default.ReplaceType))
+            {
+                label4.Text = Properties.Settings.Default.ReplaceType;
+                UpdateArrows();
             }
             else
             {
-                Properties.Settings.Default.SoundFileName = Properties.Settings.Default.GetType()
-                                                 .GetProperty(nameof(Properties.Settings.Default.SoundFileName))
-                                                 .GetCustomAttribute<System.Configuration.DefaultSettingValueAttribute>()
-                                                 .Value;
+                Properties.Settings.Default.ReplaceType = Properties.Settings.Default.Properties["ReplaceType"].DefaultValue as string;
             }
             // check for updates
             if (!HasInternetConnection())
@@ -419,10 +745,7 @@ namespace Roblox_Oof_Replacer
 
         private void button6_Click(object sender, EventArgs e)
         {
-            Properties.Settings.Default.ShortcutFileName = Properties.Settings.Default.GetType()
-                                                 .GetProperty(nameof(Properties.Settings.Default.ShortcutFileName))
-                                                 .GetCustomAttribute<System.Configuration.DefaultSettingValueAttribute>()
-                                                 .Value;
+            Properties.Settings.Default.ShortcutFileName = Properties.Settings.Default.Properties["ShortcutFileName"].DefaultValue as string;
             openFileDialog1.FileName = Properties.Settings.Default.ShortcutFileName;
             folderBrowserDialog1.SelectedPath = string.Empty;
             label1.Text = Properties.Settings.Default.ShortcutFileName;
@@ -437,12 +760,53 @@ namespace Roblox_Oof_Replacer
 
         private void button5_Click(object sender, EventArgs e)
         {
-            Properties.Settings.Default.SoundFileName = Properties.Settings.Default.GetType()
-                                                 .GetProperty(nameof(Properties.Settings.Default.SoundFileName))
-                                                 .GetCustomAttribute<System.Configuration.DefaultSettingValueAttribute>()
-                                                 .Value;
-            openFileDialog2.FileName = Properties.Settings.Default.SoundFileName;
-            label2.Text = "Old Oof";
+            switch (Properties.Settings.Default.ReplaceType)
+            {
+                case "Death Sound":
+                    {
+                        Properties.Settings.Default.SoundFileName = Properties.Settings.Default.Properties["SoundFileName"].DefaultValue as string;
+                        openFileDialog2.FileName = Properties.Settings.Default.SoundFileName;
+                        if (Properties.Settings.Default.SoundFileName == string.Empty)
+                            label2.Text = "Old Oof";
+                        else
+                            label2.Text = Properties.Settings.Default.SoundFileName;
+                        break;
+                    }
+                case "Footstep":
+                    {
+                        Properties.Settings.Default.FootstepSoundFileName = Properties.Settings.Default.Properties["FootstepSoundFileName"].DefaultValue as string;
+                        openFileDialog2.FileName = Properties.Settings.Default.FootstepSoundFileName;
+                        if (Properties.Settings.Default.FootstepSoundFileName == string.Empty)
+                            label2.Text = "Default Footsteps";
+                        else
+                            label2.Text = Properties.Settings.Default.FootstepSoundFileName;
+                        break;
+                    }
+                case "Mouse":
+                    {
+                        Properties.Settings.Default.MouseImageFileName = Properties.Settings.Default.Properties["MouseImageFileName"].DefaultValue as string[];
+                        openFileDialog2.FileName = string.Empty;
+                        if (Properties.Settings.Default.MouseImageFileName != null)
+                        {
+                            for (int i = 0; i < Properties.Settings.Default.MouseImageFileName.
+                                    Length; i++)
+                            {
+                                if (!File.Exists(Properties.Settings.Default.MouseImageFileName[i]))
+                                {
+                                    openFileDialog2.FileName = string.Empty;
+                                    Properties.Settings.Default.MouseImageFileName = Properties.Settings.Default.Properties["MouseImageFileName"].DefaultValue as string[];
+                                    break;
+                                }
+                                openFileDialog2.FileName += "\"" + Properties.Settings.Default.MouseImageFileName[i] + "\"";
+                            }
+                        }
+                        if (Properties.Settings.Default.MouseImageFileName == null || Properties.Settings.Default.MouseImageFileName.Length <= 0)
+                            label2.Text = "Default Mouse";
+                        else
+                            label2.Text = string.Join(", ", Properties.Settings.Default.MouseImageFileName);
+                        break;
+                    }
+            }
         }
 
         private void label1_DragDrop(object sender, DragEventArgs e)
@@ -487,8 +851,9 @@ namespace Roblox_Oof_Replacer
 
         private void DisallowUrlExtensions(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            string extension = Path.GetExtension(openFileDialog1.FileName);
-            if (extension == ".url") 
+            FileDialog fileDialog = sender as FileDialog;
+            string extension = Path.GetExtension(fileDialog.FileName);
+            if (extension == ".url" || fileDialog.FileNames.Length > 4) 
                 e.Cancel = true;
         }
 
@@ -498,8 +863,38 @@ namespace Roblox_Oof_Replacer
             {
                 case "Copy Path":
                     if (ContextMenuLabel != null)
-                        Clipboard.SetText(ContextMenuLabel.Text);
+                        Clipboard.SetText(ContextMenuLabel.Text.Replace(",", ""));
                     break;
+                case "Open in File Explorer":
+                    string argument = "/select, \"" + ContextMenuLabel.Text.Split(",")[0] + "\"";
+
+                    Process.Start("explorer.exe", argument);
+                    break;
+            }
+        }
+
+        public static string AddOrdinal(int num)
+        {
+            if (num <= 0) return num.ToString();
+
+            switch (num % 100)
+            {
+                case 11:
+                case 12:
+                case 13:
+                    return num + "th";
+            }
+
+            switch (num % 10)
+            {
+                case 1:
+                    return num + "st";
+                case 2:
+                    return num + "nd";
+                case 3:
+                    return num + "rd";
+                default:
+                    return num + "th";
             }
         }
 
@@ -509,12 +904,119 @@ namespace Roblox_Oof_Replacer
             if (owner != null)
             {
                 System.Windows.Forms.Label sourceControl = (System.Windows.Forms.Label)owner.SourceControl;
-                if (sourceControl.Text == "Old Oof")
+                if (!Directory.Exists(sourceControl.Text) && !File.Exists(sourceControl.Text) && !sourceControl.Text.Contains(","))
                 {
                     e.Cancel = true;
                     return;
                 }
-                ContextMenuLabel = (System.Windows.Forms.Label)sourceControl;
+                foreach (ToolStripMenuItem item in contextMenuStrip1.Items)
+                {
+                    item.DropDownItems.Clear();
+                    if (sourceControl.Text.Split(",").Length > 1)
+                    {
+                        for (int i = 0; i < sourceControl.Text.Split(",").Length; i++)
+                            item.DropDownItems.Add(AddOrdinal(i + 1) + " Path");
+                    }
+                }
+                ContextMenuLabel = sourceControl;
+            }
+        }
+
+        private void UpdateArrows()
+        {
+            var index = Array.IndexOf(ReplaceTypes, Properties.Settings.Default.ReplaceType);
+            button8.Visible = index - 1 >= 0;
+            button9.Visible = index + 1 < ReplaceTypes.Length;
+
+            switch (Properties.Settings.Default.ReplaceType)
+            {
+                case "Death Sound":
+                    {
+                        openFileDialog2.FileName = Properties.Settings.Default.SoundFileName;
+                        if (Properties.Settings.Default.SoundFileName == string.Empty)
+                            label2.Text = "Old Oof";
+                        else
+                            label2.Text = Properties.Settings.Default.SoundFileName;
+                        button4.Text = "Pick Sound";
+                        break;
+                        
+                    }
+                case "Footstep":
+                    {
+                        openFileDialog2.FileName = Properties.Settings.Default.FootstepSoundFileName;
+                        if (Properties.Settings.Default.FootstepSoundFileName == string.Empty)
+                            label2.Text = "Default Footsteps";
+                        else
+                            label2.Text = Properties.Settings.Default.FootstepSoundFileName;
+                        button4.Text = "Pick Sound";
+                        break;
+                    }
+                case "Mouse":
+                    {
+                        openFileDialog2.FileName = string.Empty;
+                        if (Properties.Settings.Default.MouseImageFileName != null)
+                        {
+                            for (int i = 0; i < Properties.Settings.Default.MouseImageFileName.
+                                Length; i++)
+                            {
+                                if (!File.Exists(Properties.Settings.Default.MouseImageFileName[i]))
+                                {
+                                    openFileDialog2.FileName = string.Empty;
+                                    Properties.Settings.Default.MouseImageFileName = Properties.Settings.Default.Properties["MouseImageFileName"].DefaultValue as string[];
+                                    break;
+                                }
+                                openFileDialog2.FileName += "\"" + Properties.Settings.Default.MouseImageFileName[i] + "\"";
+                            }
+                        }
+                        if (Properties.Settings.Default.MouseImageFileName == null || Properties.Settings.Default.MouseImageFileName.Length <= 0)
+                            label2.Text = "Default Mouse";
+                        else
+                            label2.Text = string.Join(", ", Properties.Settings.Default.MouseImageFileName);
+                        button4.Text = "Pick Images";
+                        break;
+                    }
+            }
+        }
+
+        private void button8_Click(object sender, EventArgs e)
+        {
+            var index = Array.IndexOf(ReplaceTypes, Properties.Settings.Default.ReplaceType);
+            Properties.Settings.Default.ReplaceType = ReplaceTypes[index - 1];
+            label4.Text = Properties.Settings.Default.ReplaceType;
+            UpdateArrows();
+        }
+
+        private void button9_Click(object sender, EventArgs e)
+        {
+            var index = Array.IndexOf(ReplaceTypes, Properties.Settings.Default.ReplaceType);
+            Properties.Settings.Default.ReplaceType = ReplaceTypes[index + 1];
+            label4.Text = Properties.Settings.Default.ReplaceType;
+            UpdateArrows();
+        }
+
+        private void DropDownItemClicked(object sender, ToolStripItemClickedEventArgs e)
+        {
+            string resultString = System.Text.RegularExpressions.Regex.Match(e.ClickedItem.Text, @"\d+").Value;
+            if (resultString != string.Empty)
+            {
+                int number = Int32.Parse(resultString);
+                if (number <= ContextMenuLabel.Text.Split(", ").Length && number > 0)
+                {
+                    string stringToUse = ContextMenuLabel.Text.Split(", ")[number - 1];
+                    MessageBox.Show(stringToUse);
+                    switch (e.ClickedItem.OwnerItem.Text)
+                    {
+                        case "Copy Path":
+                            if (ContextMenuLabel != null)
+                                Clipboard.SetText(stringToUse);
+                            break;
+                        case "Open in File Explorer":
+                            string argument = "/select, \"" + stringToUse + "\"";
+
+                            Process.Start("explorer.exe", argument);
+                            break;
+                    }
+                }
             }
         }
     }

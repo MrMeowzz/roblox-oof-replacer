@@ -37,6 +37,7 @@
             this.label2 = new System.Windows.Forms.Label();
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.copyPathToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.openInFileExplorerToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openFileDialog2 = new System.Windows.Forms.OpenFileDialog();
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
             this.version = new System.Windows.Forms.Label();
@@ -47,13 +48,16 @@
             this.folderBrowserDialog1 = new System.Windows.Forms.FolderBrowserDialog();
             this.button7 = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
+            this.button8 = new System.Windows.Forms.Button();
+            this.button9 = new System.Windows.Forms.Button();
+            this.label4 = new System.Windows.Forms.Label();
             this.contextMenuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
             // button1
             // 
             this.button1.Font = new System.Drawing.Font("Segoe UI", 13F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.button1.Location = new System.Drawing.Point(12, 197);
+            this.button1.Location = new System.Drawing.Point(12, 223);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(181, 46);
             this.button1.TabIndex = 0;
@@ -64,7 +68,7 @@
             // button2
             // 
             this.button2.Font = new System.Drawing.Font("Segoe UI", 13F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.button2.Location = new System.Drawing.Point(298, 197);
+            this.button2.Location = new System.Drawing.Point(298, 223);
             this.button2.Name = "button2";
             this.button2.Size = new System.Drawing.Size(181, 46);
             this.button2.TabIndex = 1;
@@ -86,7 +90,7 @@
             // button4
             // 
             this.button4.Font = new System.Drawing.Font("Segoe UI", 13.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.button4.Location = new System.Drawing.Point(12, 115);
+            this.button4.Location = new System.Drawing.Point(12, 141);
             this.button4.Name = "button4";
             this.button4.Size = new System.Drawing.Size(181, 46);
             this.button4.TabIndex = 5;
@@ -101,7 +105,7 @@
             this.label2.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.label2.ContextMenuStrip = this.contextMenuStrip1;
             this.label2.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            this.label2.Location = new System.Drawing.Point(199, 126);
+            this.label2.Location = new System.Drawing.Point(199, 152);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(242, 23);
             this.label2.TabIndex = 8;
@@ -112,17 +116,26 @@
             // contextMenuStrip1
             // 
             this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.copyPathToolStripMenuItem});
+            this.copyPathToolStripMenuItem,
+            this.openInFileExplorerToolStripMenuItem});
             this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(130, 26);
+            this.contextMenuStrip1.Size = new System.Drawing.Size(184, 48);
             this.contextMenuStrip1.Opening += new System.ComponentModel.CancelEventHandler(this.contextMenuStrip1_Opening);
             this.contextMenuStrip1.ItemClicked += new System.Windows.Forms.ToolStripItemClickedEventHandler(this.contextMenuStrip1_ItemClicked);
             // 
             // copyPathToolStripMenuItem
             // 
             this.copyPathToolStripMenuItem.Name = "copyPathToolStripMenuItem";
-            this.copyPathToolStripMenuItem.Size = new System.Drawing.Size(129, 22);
+            this.copyPathToolStripMenuItem.Size = new System.Drawing.Size(183, 22);
             this.copyPathToolStripMenuItem.Text = "Copy Path";
+            this.copyPathToolStripMenuItem.DropDownItemClicked += new System.Windows.Forms.ToolStripItemClickedEventHandler(this.DropDownItemClicked);
+            // 
+            // openInFileExplorerToolStripMenuItem
+            // 
+            this.openInFileExplorerToolStripMenuItem.Name = "openInFileExplorerToolStripMenuItem";
+            this.openInFileExplorerToolStripMenuItem.Size = new System.Drawing.Size(183, 22);
+            this.openInFileExplorerToolStripMenuItem.Text = "Open in File Explorer";
+            this.openInFileExplorerToolStripMenuItem.DropDownItemClicked += new System.Windows.Forms.ToolStripItemClickedEventHandler(this.DropDownItemClicked);
             // 
             // openFileDialog2
             // 
@@ -165,7 +178,7 @@
             this.button5.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.button5.AutoSize = true;
             this.button5.Font = new System.Drawing.Font("Segoe UI", 18F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.button5.Location = new System.Drawing.Point(447, 119);
+            this.button5.Location = new System.Drawing.Point(447, 145);
             this.button5.Name = "button5";
             this.button5.Size = new System.Drawing.Size(40, 42);
             this.button5.TabIndex = 12;
@@ -178,7 +191,7 @@
             this.button6.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.button6.AutoSize = true;
             this.button6.Font = new System.Drawing.Font("Segoe UI", 18F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
-            this.button6.Location = new System.Drawing.Point(447, 34);
+            this.button6.Location = new System.Drawing.Point(447, 38);
             this.button6.Name = "button6";
             this.button6.Size = new System.Drawing.Size(40, 42);
             this.button6.TabIndex = 13;
@@ -220,11 +233,55 @@
             this.label1.DragDrop += new System.Windows.Forms.DragEventHandler(this.label1_DragDrop);
             this.label1.DragEnter += new System.Windows.Forms.DragEventHandler(this.label1_DragEnter);
             // 
+            // button8
+            // 
+            this.button8.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.button8.AutoSize = true;
+            this.button8.Font = new System.Drawing.Font("Segoe UI", 18F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.button8.Location = new System.Drawing.Point(131, 93);
+            this.button8.Name = "button8";
+            this.button8.Size = new System.Drawing.Size(41, 42);
+            this.button8.TabIndex = 15;
+            this.button8.Text = "<";
+            this.button8.UseVisualStyleBackColor = true;
+            this.button8.Visible = false;
+            this.button8.Click += new System.EventHandler(this.button8_Click);
+            // 
+            // button9
+            // 
+            this.button9.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.button9.AutoSize = true;
+            this.button9.Font = new System.Drawing.Font("Segoe UI", 18F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point);
+            this.button9.Location = new System.Drawing.Point(313, 93);
+            this.button9.Name = "button9";
+            this.button9.Size = new System.Drawing.Size(41, 42);
+            this.button9.TabIndex = 16;
+            this.button9.Text = ">";
+            this.button9.UseVisualStyleBackColor = true;
+            this.button9.Visible = false;
+            this.button9.Click += new System.EventHandler(this.button9_Click);
+            // 
+            // label4
+            // 
+            this.label4.AllowDrop = true;
+            this.label4.AutoEllipsis = true;
+            this.label4.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.label4.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.label4.Location = new System.Drawing.Point(178, 106);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(129, 23);
+            this.label4.TabIndex = 17;
+            this.label4.Text = "Death Sound";
+            this.label4.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
             // RobloxOofReplacer
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(491, 255);
+            this.ClientSize = new System.Drawing.Size(491, 280);
+            this.Controls.Add(this.label4);
+            this.Controls.Add(this.button9);
+            this.Controls.Add(this.button8);
             this.Controls.Add(this.button7);
             this.Controls.Add(this.button6);
             this.Controls.Add(this.button5);
@@ -267,6 +324,10 @@
         private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
         private System.Windows.Forms.ToolStripMenuItem copyPathToolStripMenuItem;
         private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Button button8;
+        private System.Windows.Forms.Button button9;
+        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.ToolStripMenuItem openInFileExplorerToolStripMenuItem;
     }
 }
 
