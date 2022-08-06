@@ -1003,7 +1003,6 @@ namespace Roblox_Oof_Replacer
                 if (number <= ContextMenuLabel.Text.Split(", ").Length && number > 0)
                 {
                     string stringToUse = ContextMenuLabel.Text.Split(", ")[number - 1];
-                    MessageBox.Show(stringToUse);
                     switch (e.ClickedItem.OwnerItem.Text)
                     {
                         case "Copy Path":
